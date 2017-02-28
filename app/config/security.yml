@@ -1,0 +1,54 @@
+# To get started with security, check out the documentation:
+# http://symfony.com/doc/current/book/security.html
+security:
+    encoders:   # Un encodeur est un objet qui encode les mots de passe de vos utilisateurs
+        FOS\UserBundle\Model\UserInterface: bcrypt
+
+    role_hierarchy:   # On assigne un ou plusieurs rôles à chaque utilisateur
+         ROLE_ADMIN:       ROLE_USER        # le rôle ROLE_USER est compris dans le rôle  ROLE_ADMIN.
+         ROLE_SUPER_ADMIN: ROLE_ADMIN
+        
+    # http://symfony.com/doc/current/book/security.html#where-do-users-come-from-user-providers
+    # Un provider est un fournisseur d'utilisateurs. 
+     # Les firewalls s'adressent aux providers pour récupérer les utilisateurs pour les identifier.
+    providers:    
+        fos_userbundle:
+            id: fos_user.user_provider.username
+
+    # pare-feux
+    firewalls:
+
+        login:
+            pattern:  ^/api/login
+            stateless: true
+            anonymous: true
+            provider: fos_userbundle
+ 
+            form_login:
+                check_path:               /api/login_check
+                success_handler:        lexik_jwt_authentication.handler.authentication_success
+                failure_handler:          lexik_jwt_authentication.handler.authentication_failure
+                require_previous_session: false
+                username_parameter: _username
+                password_parameter: _password
+
+        api:
+            pattern:   ^/api
+            stateless: true
+            provider: fos_userbundle
+            lexik_jwt:
+                authorization_header:
+                    enabled: true       # le token sera passé via l'entête
+                    prefix:  Bearer      # avec un préfixe Bearer
+                    
+        # disables authentication for assets and the profiler, adapt it according to your needs
+        # Ce pare-feu permet de désactiver la sécurité sur certaines URL
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+    # le contrôle d'accès détermine si le visiteur a les bons droits (rôles) pour accéder à la ressource demandée
+     # ici on applique des règles sur des URL
+    access_control:
+        - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }

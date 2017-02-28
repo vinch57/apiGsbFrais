@@ -1,0 +1,25 @@
+#./src/FraisApiBundle/Resources/config/routing_rest.yml
+fichefrais :
+    type: rest
+    resource:     "FraisApiBundle:FichefraisRest"
+    name_prefix:  api_fichefrais_
+  
+fraisforfait :
+    type: rest
+    resource: "FraisApiBundle:FraisforfaitRest"
+    name_prefix: api_fraisforfait_
+
+fraishorsforfait :
+    type: rest
+    resource: "FraisApiBundle:FraishorsforfaitRest"
+    name_prefix: api_fraishorsforfait
+    
+typefraisforfait :
+    type: rest
+    resource:     "FraisApiBundle:TypefraisforfaitRest"
+    name_prefix:  api_typefraisforfait_
+  
+etat :
+    type: rest
+    resource:   "FraisApiBundle:EtatRest"
+    name_prefixe: api_etat_

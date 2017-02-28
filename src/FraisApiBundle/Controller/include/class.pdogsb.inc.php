@@ -430,11 +430,12 @@ class PdoGsb {
      */
     public function getLesAnneesDisponibles($idVisiteur) {
         try {
-            $requete_prepare = PdoGSB:: $monPdo->prepare("SELECT fichefrais.mois AS annee "
-                    . "FROM fichefrais "
-                    . "WHERE fichefrais.idvisiteur = :unIdVisiteur "
-                    . "GROUP BY substr(fichefrais.mois, 1, 4) "
-                    . "ORDER BY fichefrais.mois desc");
+            $requete_prepare = PdoGSB:: $monPdo->prepare("SELECT substr(fichefrais.mois, 1, 4) AS annee "
+                . "FROM fichefrais "
+                . "WHERE fichefrais.idvisiteur = :unIdVisiteur "
+                . "GROUP BY substr(fichefrais.mois, 1, 4) "
+                . "ORDER BY annee desc"
+            );
             $requete_prepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
             $requete_prepare->execute();
             $lesAnnees = array();

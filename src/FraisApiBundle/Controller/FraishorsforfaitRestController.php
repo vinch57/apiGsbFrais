@@ -27,36 +27,63 @@ class FraishorsforfaitRestController extends FOSRestController {
 
         return new JsonResponse($lesFraisHorsforfait);
     }
+    
+    
+    public function getFraishorsforfaittotauxAction($idVisiteur) {
+        $pdo = PdoGsb::getPdoGsb();
+        $lesFraisHorsForfaitTotaux = $pdo->getLesFraisHorsForfaitTotaux($idVisiteur);
+        
+        if(!$lesFraisHorsForfaitTotaux) {
+            throw new NotFoundHttpException('Frais hors forfait totaux non disponibles ! [idVisiteur='.$idVisiteur.']');
+        }
+        
+        return new JsonResponse($lesFraisHorsForfaitTotaux);
+    }
 
     public function postFraishorsforfaitAction(Request $request) {
         $pdo = PdoGsb::getPdoGsb();
-// récupérer les paramètres passés par POST dans l'objet $request
+        // récupérer les paramètres passés par POST dans l'objet $request
         $idVisiteur = $request->request->get('idVisiteur');
         $mois = $request->request->get('mois');
         $libelle = $request->request->get('libelle');
         $date = $request->request->get('date');
         $montant = $request->request->get('montant');
-// appeler la méthode de mise à jour de la classe pdogsb
-        $pdo->creeNouveauFraisHorsForfait($idVisiteur, $mois, $libelle, $date, $montant);
-// répondre au client
+        $client = $request->request->get('client');
+        // appeler la méthode de mise à jour de la classe pdogsb
+        $pdo->creeNouveauFraisHorsForfait($idVisiteur, $mois, $libelle, $date, $montant, $client);
+        // répondre au client
         $response = new Response();
         $statusCode = 201; // created, liste des codes ici http://www.codeshttp.com/
         $response->setStatusCode($statusCode); // created
         return $response;
     }
 
-       public function deleteFraishorsforfaitAction(Request $request) {
+    public function deleteFraishorsforfaitAction(Request $request) {
         $pdo = PdoGsb::getPdoGsb();
-// récupérer les paramètres passés par DELETE dans l'objet $request
+        // récupérer les paramètres passés par DELETE dans l'objet $request
         $idFrais = $request->request->get('idFrais');
- 
-// appeler la méthode de mise à jour de la classe pdogsb
+
+        // appeler la méthode de mise à jour de la classe pdogsb
         $pdo->supprimerFraisHorsForfait($idFrais);
-// répondre au client
+        // répondre au client
         $response = new Response();
         $statusCode = 200; // created, liste des codes ici http://www.codeshttp.com/
         $response->setStatusCode($statusCode); // created
         return $response;
+    }
+    
+    public function getTotauxfraisparclientAction($idVisiteur)
+    {
+        $pdo = PdoGsb::getPdoGsb();
+        $totauxFraisHorsForfaitClient = $pdo->getLesFraisHorsForfaitClientTotaux($idVisiteur);
+        return new JsonResponse($totauxFraisHorsForfaitClient);
+    }
+    
+    public function getLesclientsvisiteurAction($idVisiteur)
+    {
+        $pdo = PdoGsb::getPdoGsb();
+        $lesClientsVisiteur = $pdo->getLesClientsVisiteur($idVisiteur);
+        return new JsonResponse($lesClientsVisiteur);
     }
 
 }

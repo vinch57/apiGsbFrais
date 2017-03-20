@@ -91,4 +91,17 @@ class FichefraisRestController extends FOSRestController
         $response->setStatusCode($statusCode);
         return $response;
     }
+    
+    public function getLesinfosfichefraisMoisAction($idVisiteur, $mois) {
+        $pdo = PdoGsb::getPdoGsb();
+        $lesInfosFicheFrais = $pdo->getLesInfosFicheFrais($idVisiteur, $mois);
+        
+        if(!$lesInfosFicheFrais)
+        {
+            throw new NotFoundHttpException('Informations de fiche de frais introuvables pour le visiteur et le mois [idVisiteur='.$idVisiteur.']' .'[mois='.$mois.']');
+        }
+
+        return new JsonResponse($lesInfosFicheFrais);
+    }
+    
 }

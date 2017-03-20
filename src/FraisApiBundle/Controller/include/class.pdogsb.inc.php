@@ -81,19 +81,25 @@ class PdoGsb {
      */
     public function getLesFraisHorsForfait($idVisiteur, $mois) {
         try {
-            $requete_prepare = PdoGsb::$monPdo->prepare("SELECT * FROM lignefraishorsforfait "
-                    . "WHERE lignefraishorsforfait.idvisiteur = :unIdVisiteur "
-                    . "AND lignefraishorsforfait.mois = :unMois");
+            $requete_prepare = PdoGsb::$monPdo->prepare(
+                "SELECT LFHF.id, LFHF.libelle, LFHF.date, LFHF.montant, c.nom AS nom_client, c.ville "
+                ."FROM lignefraishorsforfait LFHF "
+                ."LEFT JOIN client c "
+                ."ON c.id = LFHF.id_client "
+                ."WHERE LFHF.idvisiteur = :unIdVisiteur "
+                ."AND LFHF.mois = :unMois "
+            );
             $requete_prepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
             $requete_prepare->bindParam(':unMois', $mois, PDO::PARAM_STR);
             $requete_prepare->execute();
+            //var_dump($requete_prepare->errorInfo());die;
             $lesLignes = $requete_prepare->fetchAll();
             for ($i = 0; $i < count($lesLignes); $i++) {
                 $date = $lesLignes[$i]['date'];
                 $lesLignes[$i]['date'] = dateAnglaisVersFrancais($date);
             }
             return $lesLignes;
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -105,11 +111,16 @@ class PdoGsb {
      */
     public function getLesFraisHorsForfaitTotaux($idVisiteur) {
         try {
-            $requete_prepare = PdoGsb::$monPdo->prepare("select substr(mois,1,4) as annee, sum(montant) from lignefraishorsforfait where idVisiteur = :unIdVisiteur group by annee;");
+            $requete_prepare = PdoGsb::$monPdo->prepare(
+                "select substr(mois,1,4) as annee, sum(montant) "
+                . "from lignefraishorsforfait "
+                . "where idVisiteur = :unIdVisiteur "
+                . "group by annee "
+            );
             $requete_prepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
             $requete_prepare->execute();
             return $requete_prepare->fetchAll();
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -121,11 +132,18 @@ class PdoGsb {
      */
     public function getLesFraisForfaitTotaux($idVisiteur) {
         try {
-            $requete_prepare = PdoGsb::$monPdo->prepare("select substr(mois,1,4), sum(fraisforfait.montant) from fraisforfait inner join lignefraisforfait on fraisforfait.id = lignefraisforfait.idFraisForfait where idVisiteur = :unIdVisiteur group by substr(mois,1,4);");
+            $requete_prepare = PdoGsb::$monPdo->prepare(
+                "select substr(mois,1,4), sum(fraisforfait.montant) "
+                . "from fraisforfait "
+                . "inner join lignefraisforfait "
+                . "on fraisforfait.id = lignefraisforfait.idFraisForfait "
+                . "where idVisiteur = :unIdVisiteur "
+                . "group by substr(mois,1,4)"
+            );
             $requete_prepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
             $requete_prepare->execute();
             return $requete_prepare->fetchAll();
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -148,7 +166,7 @@ class PdoGsb {
             $requete_prepare->execute();
             $laLigne = $requete_prepare->fetch();
             return $laLigne['nb'];
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -175,7 +193,7 @@ class PdoGsb {
             $requete_prepare->bindParam(':unMois', $mois, PDO::PARAM_STR);
             $requete_prepare->execute();
             return $requete_prepare->fetchAll();
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -191,7 +209,7 @@ class PdoGsb {
             $requete_prepare->bindParam(':uneAnnee', $annee, PDO::PARAM_STR);
             $requete_prepare->execute();
             return $requete_prepare->fetchAll();
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -208,7 +226,7 @@ class PdoGsb {
                     . "ORDER BY fraisforfait.id");
             $requete_prepare->execute();
             return $requete_prepare->fetchAll();
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -239,7 +257,7 @@ class PdoGsb {
                 $requete_prepare->bindParam(':idFrais', $unIdFrais, PDO::PARAM_STR);
                 $requete_prepare->execute();
             }
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -261,7 +279,7 @@ class PdoGsb {
             $requete_prepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
             $requete_prepare->bindParam(':unMois', $mois, PDO::PARAM_STR);
             $requete_prepare->execute();
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -287,7 +305,7 @@ class PdoGsb {
                 $ok = true;
             }
             return $ok;
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -308,7 +326,7 @@ class PdoGsb {
             $laLigne = $requete_prepare->fetch();
             $dernierMois = $laLigne['dernierMois'];
             return $dernierMois;
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -344,7 +362,7 @@ class PdoGsb {
                 $requete_prepare->bindParam(':idFrais', $unIdFrais['idfrais'], PDO::PARAM_STR);
                 $requete_prepare->execute();
             }
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -358,19 +376,21 @@ class PdoGsb {
      * @param $libelle : le libelle du frais
      * @param $date : la date du frais au format français jj//mm/aaaa
      * @param $montant : le montant
+     * @param $client : le client
      */
-    public function creeNouveauFraisHorsForfait($idVisiteur, $mois, $libelle, $date, $montant) {
+    public function creeNouveauFraisHorsForfait($idVisiteur, $mois, $libelle, $date, $montant, $client) {
         try {
             $dateFr = dateFrancaisVersAnglais($date);
-            $requete_prepare = PdoGSB::$monPdo->prepare("INSERT INTO lignefraishorsforfait "
-                    . "VALUES ('', :unIdVisiteur,:unMois, :unLibelle, :uneDateFr, :unMontant) ");
+            $requete_prepare = PdoGSB::$monPdo->prepare("INSERT INTO lignefraishorsforfait (idVisiteur, mois, libelle, date, montant, id_client) "
+                    . "VALUES (:unIdVisiteur,:unMois, :unLibelle, :uneDateFr, :unMontant, :unClient) ");
             $requete_prepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
             $requete_prepare->bindParam(':unMois', $mois, PDO::PARAM_STR);
             $requete_prepare->bindParam(':unLibelle', $libelle, PDO::PARAM_STR);
             $requete_prepare->bindParam(':uneDateFr', $dateFr, PDO::PARAM_STR);
             $requete_prepare->bindParam(':unMontant', $montant, PDO::PARAM_INT);
+            $requete_prepare->bindParam(':unClient', $client, PDO::PARAM_INT);
             $requete_prepare->execute();
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -386,7 +406,7 @@ class PdoGsb {
                     . "WHERE lignefraishorsforfait.id = :unIdFrais");
             $requete_prepare->bindParam(':unIdFrais', $idFrais, PDO::PARAM_STR);
             $requete_prepare->execute();
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -417,7 +437,7 @@ class PdoGsb {
                 );
             }
             return $lesMois;
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -447,7 +467,7 @@ class PdoGsb {
                 );
             }
             return $lesAnnees;
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -472,7 +492,7 @@ class PdoGsb {
             $requete_prepare->execute();
             $laLigne = $requete_prepare->fetch();
             return $laLigne;
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
@@ -494,7 +514,42 @@ class PdoGsb {
             $requete_prepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
             $requete_prepare->bindParam(':unMois', $mois, PDO::PARAM_STR);
             $requete_prepare->execute();
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+    
+    public function getLesFraisHorsForfaitClientTotaux($idVisiteur)
+    {
+        try {
+            $requete_prepare = PdoGsb::$monPdo->prepare(
+                'SELECT c.id, c.nom, c.civiliteTitreContact, c.prenomContact, c.nomContact, ville, count(*) as nombreFrais, SUM(LFHF.montant) AS montantFrais '
+                .'FROM client c '
+                .'INNER JOIN lignefraishorsforfait LFHF on c.id = LFHF.id_client '
+                .'WHERE c.idVisiteur = :unIdVisiteur '
+                .' GROUP BY c.id '
+                .'ORDER BY montantFrais DESC'
+            );
+            $requete_prepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
+            $requete_prepare->execute();
+            return $requete_prepare->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+    
+    public function getLesClientsVisiteur($idVisiteur)
+    {
+        try {
+            $requete_prepare = PdoGsb::$monPdo->prepare(
+                'select id, nom '
+                .'from client '
+                .'where idVisiteur = :unIdVisiteur'
+            );
+            $requete_prepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
+            $requete_prepare->execute();
+            return $requete_prepare->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
             die($e->getMessage());
         }
     }
